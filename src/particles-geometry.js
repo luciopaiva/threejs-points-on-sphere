@@ -23,8 +23,4 @@ export default class ParticlesGeometry extends THREE.BufferGeometry {
 
         this.attributes.position.needsUpdate = true;
     }
-
-    setColor(color) {
-        
-    }
 }
