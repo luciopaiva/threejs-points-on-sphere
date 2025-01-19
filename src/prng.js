@@ -1,5 +1,6 @@
 
-// adapted from https://stackoverflow.com/a/47593316/778272
+// Adapted from https://stackoverflow.com/a/47593316/778272
+// Interesting read: https://github.com/bryc/code/blob/master/jshash/PRNGs.md
 
 export default class PRNG {
 
