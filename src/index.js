@@ -2,31 +2,37 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Pane } from 'tweakpane';
+import ParticlesGeometry from "./particles-geometry.js";
 
 const pane = new Pane();
 
-const PARAMS = {
-    factor: 50,
-    title: 'hello',
-    color: '#ff0055',
+const params = {
+    particleSize: 0.02,
+    numParticles: 500,
+    color: '#ebff34',
 };
 
-const paneFactor = pane.addBinding(PARAMS, 'factor', { min: 0, max: 100, step: 10 });
-paneFactor.on("change", (event) => { console.info(event) });
-pane.addBinding(PARAMS, 'title');
-pane.addBinding(PARAMS, 'color');
+const particleSizeBinding = pane.addBinding(params, 'particleSize', { min: 0, max: 0.1, step: 0.01 });
+particleSizeBinding.on("change", (event) => { particlesMaterial.size = event.value; });
+const numParticlesBinding = pane.addBinding(params, 'numParticles', { min: 0, max: 5000, step: 1 });
+pane.addBinding(params, 'color').on("change", (event) => { particlesMaterial.color.set(event.value); });
 
 const canvas = document.querySelector('canvas.webgl');
 
 const scene = new THREE.Scene();
 
-const textureLoader = new THREE.TextureLoader();
+const particlesGeometry = new ParticlesGeometry(params.numParticles);
 
-const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial()
-);
-scene.add(cube);
+numParticlesBinding.on("change", (event) => { if (event.last) { particlesGeometry.recreate(event.value); } });
+
+const particlesMaterial = new THREE.PointsMaterial({
+    size: params.particleSize,
+    sizeAttenuation: true,
+    color: params.color,
+});
+
+const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+scene.add(particles);
 
 const sizes = {
     width: window.innerWidth,
