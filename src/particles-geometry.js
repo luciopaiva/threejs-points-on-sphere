@@ -26,10 +26,20 @@ export default class ParticlesGeometry extends THREE.BufferGeometry {
         // reset every time so we get deterministic results
         this.#rand.reset();
 
-        for (let i = 0; i < count * 3; i++) {
-            this.attributes.position.array[i] = (this.#rand.next() - 0.5) * 10;
+        for (let i = 0; i < count * 3; i += 3) {
+            this.#spawnPoint(i);
         }
 
         this.attributes.position.needsUpdate = true;
+    }
+
+    #spawnPoint(index) {
+        this.attributes.position.array[index] = this.#randomCoord();
+        this.attributes.position.array[index + 1] = this.#randomCoord();
+        this.attributes.position.array[index + 2] = this.#randomCoord();
+    }
+
+    #randomCoord() {
+        return (this.#rand.next() - 0.5) * 10;
     }
 }
