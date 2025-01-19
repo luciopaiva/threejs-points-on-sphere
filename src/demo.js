@@ -6,51 +6,32 @@ import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 
 export default class Demo {
 
-    #updateBind = this.update.bind(this);
-    #clock;
+    #settings;
+
+    #particlesMaterial;
+    #particlesGeometry;
+
     #controls;
     #renderer;
     #scene;
     #camera;
     #fpsGraph;
 
-    start() {
-        const pane = new Pane();
-        pane.registerPlugin(EssentialsPlugin);
+    #updateBind = this.update.bind(this);
 
-        const settings = {
+    start() {
+        this.#settings = {
             particleSize: 0.02,
             numParticles: 500,
             color: '#d97e3f',
         };
 
-        this.#fpsGraph = pane.addBlade({
-            view: "fpsgraph",
-            label: "FPS",
-            // rows: 1,
-        });
-
-        const particleSizeBinding = pane.addBinding(settings, 'particleSize', { min: 0, max: 0.1, step: 0.01 });
-        particleSizeBinding.on("change", (event) => { particlesMaterial.size = event.value; });
-        const numParticlesBinding = pane.addBinding(settings, 'numParticles', { min: 0, max: 5000, step: 1 });
-        pane.addBinding(settings, 'color').on("change", (event) => { particlesMaterial.color.set(event.value); });
-
+        this.createPane();
         const canvas = document.querySelector('canvas.webgl');
 
         this.#scene = new THREE.Scene();
 
-        const particlesGeometry = new ParticlesGeometry(settings.numParticles);
-
-        numParticlesBinding.on("change", (event) => { if (event.last) { particlesGeometry.recreate(event.value); } });
-
-        const particlesMaterial = new THREE.PointsMaterial({
-            size: settings.particleSize,
-            sizeAttenuation: true,
-            color: settings.color,
-        });
-
-        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-        this.#scene.add(particles);
+        this.createParticles();
 
         const sizes = {
             width: window.innerWidth,
@@ -84,9 +65,37 @@ export default class Demo {
         this.#renderer.setSize(sizes.width, sizes.height);
         this.#renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        this.#clock = new THREE.Clock();
-
         this.update();
+    }
+
+    createParticles() {
+        this.#particlesGeometry = new ParticlesGeometry(this.#settings.numParticles);
+
+        this.#particlesMaterial = new THREE.PointsMaterial({
+            size: this.#settings.particleSize,
+            sizeAttenuation: true,
+            color: this.#settings.color,
+        });
+
+        const particles = new THREE.Points(this.#particlesGeometry, this.#particlesMaterial);
+        this.#scene.add(particles);
+    }
+
+    createPane() {
+        const pane = new Pane();
+        pane.registerPlugin(EssentialsPlugin);
+
+        this.#fpsGraph = pane.addBlade({
+            view: "fpsgraph",
+            label: "FPS",
+            // rows: 1,
+        });
+
+        const particleSizeBinding = pane.addBinding(this.#settings, 'particleSize', { min: 0, max: 0.1, step: 0.01 });
+        particleSizeBinding.on("change", (event) => { this.#particlesMaterial.size = event.value; });
+        const numParticlesBinding = pane.addBinding(this.#settings, 'numParticles', { min: 0, max: 5000, step: 1 });
+        numParticlesBinding.on("change", (event) => { if (event.last) { this.#particlesGeometry.recreate(event.value); } });
+        pane.addBinding(this.#settings, 'color').on("change", (event) => { this.#particlesMaterial.color.set(event.value); });
     }
 
     update() {
