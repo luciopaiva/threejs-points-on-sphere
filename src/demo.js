@@ -1,4 +1,5 @@
 import {Pane} from "tweakpane";
+import * as EssentialsPlugin from "@tweakpane/plugin-essentials";
 import * as THREE from "three";
 import ParticlesGeometry from "./particles-geometry.js";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
@@ -11,15 +12,23 @@ export default class Demo {
     #renderer;
     #scene;
     #camera;
+    #fpsGraph;
 
     start() {
         const pane = new Pane();
+        pane.registerPlugin(EssentialsPlugin);
 
         const settings = {
             particleSize: 0.02,
             numParticles: 500,
-            color: '#ebff34',
+            color: '#d97e3f',
         };
+
+        this.#fpsGraph = pane.addBlade({
+            view: "fpsgraph",
+            label: "FPS",
+            // rows: 1,
+        });
 
         const particleSizeBinding = pane.addBinding(settings, 'particleSize', { min: 0, max: 0.1, step: 0.01 });
         particleSizeBinding.on("change", (event) => { particlesMaterial.size = event.value; });
@@ -81,15 +90,12 @@ export default class Demo {
     }
 
     update() {
-        const elapsedTime = this.#clock.getElapsedTime()
+        this.#fpsGraph.begin();
 
-        // Update controls
         this.#controls.update()
-
-        // Render
         this.#renderer.render(this.#scene, this.#camera)
 
-        // Call tick again on the next frame
+        this.#fpsGraph.end();
         window.requestAnimationFrame(this.#updateBind);
     }
 }
