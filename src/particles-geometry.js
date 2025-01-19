@@ -34,12 +34,15 @@ export default class ParticlesGeometry extends THREE.BufferGeometry {
     }
 
     #spawnPoint(index) {
-        this.attributes.position.array[index] = this.#randomCoord();
-        this.attributes.position.array[index + 1] = this.#randomCoord();
-        this.attributes.position.array[index + 2] = this.#randomCoord();
-    }
+        const phi = this.#rand.next() * Math.PI;
+        const theta = this.#rand.next() * Math.PI * 2;
 
-    #randomCoord() {
-        return (this.#rand.next() - 0.5) * 10;
+        const x = Math.sin(phi) * Math.cos(theta);
+        const y = Math.cos(phi);
+        const z = Math.sin(phi) * Math.sin(theta);
+
+        this.attributes.position.array[index] = x;
+        this.attributes.position.array[index + 1] = y;
+        this.attributes.position.array[index + 2] = z;
     }
 }

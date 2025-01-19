@@ -21,8 +21,8 @@ export default class Demo {
 
     start() {
         this.#settings = {
-            particleSize: 0.02,
-            numParticles: 500,
+            particleSize: 0.001,
+            numParticles: 10000,
             color: '#d97e3f',
         };
 
@@ -93,7 +93,7 @@ export default class Demo {
 
         const particleSizeBinding = pane.addBinding(this.#settings, 'particleSize', { min: 0, max: 0.1, step: 0.01 });
         particleSizeBinding.on("change", (event) => { this.#particlesMaterial.size = event.value; });
-        const numParticlesBinding = pane.addBinding(this.#settings, 'numParticles', { min: 0, max: 5000, step: 1 });
+        const numParticlesBinding = pane.addBinding(this.#settings, 'numParticles', { min: 0, max: 50000, step: 10 });
         numParticlesBinding.on("change", (event) => { this.#particlesGeometry.recreate(event.value); });
         pane.addBinding(this.#settings, 'color').on("change", (event) => { this.#particlesMaterial.color.set(event.value); });
     }
