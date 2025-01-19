@@ -24,6 +24,11 @@ export default class Demo {
             particleSize: 0.001,
             numParticles: 10000,
             color: '#d97e3f',
+            singlePatchMode: true,
+            numMeridians: 20,
+            numParallels: 10,
+            lng: 5,
+            lat: 4,
         };
 
         this.createPane();
@@ -70,6 +75,11 @@ export default class Demo {
 
     createParticles() {
         this.#particlesGeometry = new ParticlesGeometry(this.#settings.numParticles);
+        this.#particlesGeometry.setNumParallels(this.#settings.numParallels);
+        this.#particlesGeometry.setNumMeridians(this.#settings.numMeridians);
+        this.#particlesGeometry.setLatLng(this.#settings.lat, this.#settings.lng);
+        this.#particlesGeometry.setSinglePatchMode(this.#settings.singlePatchMode);
+        this.#particlesGeometry.recreate();
 
         this.#particlesMaterial = new THREE.PointsMaterial({
             size: this.#settings.particleSize,
@@ -82,20 +92,46 @@ export default class Demo {
     }
 
     createPane() {
-        const pane = new Pane();
+        const pane = new Pane({
+            title: "Settings",
+            expanded: true,
+        });
         pane.registerPlugin(EssentialsPlugin);
 
-        this.#fpsGraph = pane.addBlade({
-            view: "fpsgraph",
-            label: "FPS",
-            // rows: 1,
+        this.#fpsGraph = pane.addBlade({ view: "fpsgraph", label: "FPS", rows: 2 });
+
+        pane.addBinding(this.#settings, 'particleSize', { min: 0, max: 0.1, step: 0.01 })
+            .on("change", (event) => { this.#particlesMaterial.size = event.value; });
+
+        pane.addBinding(this.#settings, 'numParticles', { min: 0, max: 50000, step: 10 })
+            .on("change", (event) => {
+                this.#particlesGeometry.setCount(event.value);
+                this.#particlesGeometry.recreate();
+            });
+
+        pane.addBinding(this.#settings, 'color').on("change", (event) => { this.#particlesMaterial.color.set(event.value); });
+
+        const sphereSector = pane.addFolder({
+            title: "Sphere sector",
         });
 
-        const particleSizeBinding = pane.addBinding(this.#settings, 'particleSize', { min: 0, max: 0.1, step: 0.01 });
-        particleSizeBinding.on("change", (event) => { this.#particlesMaterial.size = event.value; });
-        const numParticlesBinding = pane.addBinding(this.#settings, 'numParticles', { min: 0, max: 50000, step: 10 });
-        numParticlesBinding.on("change", (event) => { this.#particlesGeometry.recreate(event.value); });
-        pane.addBinding(this.#settings, 'color').on("change", (event) => { this.#particlesMaterial.color.set(event.value); });
+        sphereSector.addBinding(this.#settings, 'singlePatchMode')
+            .on("change", (event) => {
+                this.#particlesGeometry.setSinglePatchMode(event.value);
+                this.#particlesGeometry.recreate();
+            });
+
+        sphereSector.addBinding(this.#settings, 'lng', { min: 0, max: this.#settings.numMeridians - 1, step: 1 })
+            .on("change", (event) => {
+                this.#particlesGeometry.setLatLng(this.#settings.lat, event.value);
+                this.#particlesGeometry.recreate();
+            });
+
+        sphereSector.addBinding(this.#settings, 'lat', { min: 0, max: this.#settings.numParallels - 1, step: 1 })
+            .on("change", (event) => {
+                this.#particlesGeometry.setLatLng(event.value, this.#settings.lng);
+                this.#particlesGeometry.recreate();
+            });
     }
 
     update() {

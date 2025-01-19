@@ -4,7 +4,12 @@ import PRNG from "./prng.js";
 export default class ParticlesGeometry extends THREE.BufferGeometry {
 
     #rand;
-    capacity = -1;
+    #count = -1;
+    #lat = 5;
+    #lng = 0;
+    #singlePatchMode = true;
+    #numParallels = 10;
+    #numMeridians = 20;
 
     constructor(count) {
         super();
@@ -14,35 +19,61 @@ export default class ParticlesGeometry extends THREE.BufferGeometry {
         this.recreate(count);
     }
 
-    recreate(count) {
-        if (count === this.capacity) {
-            return;
-        }
+    setSinglePatchMode(singlePatchMode) {
+        this.#singlePatchMode = singlePatchMode;
+    }
 
-        this.capacity = count;
-        const positions = new Float32Array(this.capacity * 3);
+    setLatLng(lat, lng) {
+        this.#lat = lat;
+        this.#lng = lng;
+    }
+
+    setNumParallels(numParallels) {
+        this.#numParallels = numParallels;
+    }
+
+    setNumMeridians(numMeridians) {
+        this.#numMeridians = numMeridians;
+    }
+
+    setCount(count) {
+        this.#count = count;
+    }
+
+    recreate(count = this.#count) {
+        this.#count = count;
+        const positions = new Float32Array(this.#count * 3);
         this.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
         // reset every time so we get deterministic results
         this.#rand.reset();
 
-        for (let i = 0; i < count * 3; i += 3) {
-            this.#spawnPoint(i);
+        for (let i = 0; i < this.#count; i++) {
+            this.#generatePoint(i);
         }
 
         this.attributes.position.needsUpdate = true;
     }
 
-    #spawnPoint(index) {
-        const phi = Math.acos(this.#rand.next() * 2 - 1);
-        const theta = this.#rand.next() * Math.PI * 2;
+    #generatePoint(index) {
+        const arrayIndex = index * 3;
 
+        let phi, theta;
+        if (this.#singlePatchMode) {
+            phi = Math.acos(this.#rand.next() * 2 / this.#numParallels + 2 * this.#lat / this.#numParallels - 1);
+            theta = (this.#rand.next() + this.#lng) * 2 * Math.PI / this.#numMeridians;
+        } else {
+            phi = Math.acos(this.#rand.next() * 2 - 1);
+            theta = this.#rand.next() * Math.PI * 2;
+        }
+
+        // convert to parametric equation
         const x = Math.sin(phi) * Math.cos(theta);
         const y = Math.cos(phi);
         const z = Math.sin(phi) * Math.sin(theta);
 
-        this.attributes.position.array[index] = x;
-        this.attributes.position.array[index + 1] = y;
-        this.attributes.position.array[index + 2] = z;
+        this.attributes.position.array[arrayIndex] = x;
+        this.attributes.position.array[arrayIndex + 1] = y;
+        this.attributes.position.array[arrayIndex + 2] = z;
     }
 }
