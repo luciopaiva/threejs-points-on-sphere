@@ -34,7 +34,7 @@ export default class ParticlesGeometry extends THREE.BufferGeometry {
     }
 
     #spawnPoint(index) {
-        const phi = this.#rand.next() * Math.PI;
+        const phi = Math.acos(this.#rand.next() * 2 - 1);
         const theta = this.#rand.next() * Math.PI * 2;
 
         const x = Math.sin(phi) * Math.cos(theta);
