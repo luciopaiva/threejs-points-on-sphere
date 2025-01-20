@@ -58,7 +58,7 @@ export default class Demo {
         });
 
         this.#camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
-        this.#camera.position.z = 3;
+        this.#camera.position.z = 2;
         this.#scene.add(this.#camera);
 
         this.#controls = new OrbitControls(this.#camera, canvas);
