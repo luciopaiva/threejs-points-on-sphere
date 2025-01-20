@@ -3,6 +3,7 @@ import * as EssentialsPlugin from "@tweakpane/plugin-essentials";
 import * as THREE from "three";
 import ParticlesGeometry from "./particles-geometry.js";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+import ParticlesMaterial from "./particles-material.js";
 
 export default class Demo {
 
@@ -24,7 +25,7 @@ export default class Demo {
             particleSize: 0.001,
             numParticles: 10000,
             color: '#d97e3f',
-            singlePatchMode: true,
+            singlePatchMode: false,
             numMeridians: 20,
             numParallels: 10,
             lng: 5,
@@ -70,6 +71,9 @@ export default class Demo {
         this.#renderer.setSize(sizes.width, sizes.height);
         this.#renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+        const axes = new THREE.AxesHelper(0.5);
+        this.#scene.add(axes);
+
         this.update();
     }
 
@@ -81,11 +85,7 @@ export default class Demo {
         this.#particlesGeometry.setSinglePatchMode(this.#settings.singlePatchMode);
         this.#particlesGeometry.recreate();
 
-        this.#particlesMaterial = new THREE.PointsMaterial({
-            size: this.#settings.particleSize,
-            sizeAttenuation: true,
-            color: this.#settings.color,
-        });
+        this.#particlesMaterial = new ParticlesMaterial(this.#settings.particleSize, this.#settings.color);
 
         const particles = new THREE.Points(this.#particlesGeometry, this.#particlesMaterial);
         this.#scene.add(particles);
