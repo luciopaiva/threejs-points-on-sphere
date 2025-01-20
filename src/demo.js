@@ -100,7 +100,7 @@ export default class Demo {
 
         this.#fpsGraph = pane.addBlade({ view: "fpsgraph", label: "FPS", rows: 2 });
 
-        pane.addBinding(this.#settings, 'particleSize', { min: 0, max: 0.1, step: 0.01 })
+        pane.addBinding(this.#settings, 'particleSize', { min: 0, max: 0.01, step: 0.001 })
             .on("change", (event) => { this.#particlesMaterial.size = event.value; });
 
         pane.addBinding(this.#settings, 'numParticles', { min: 0, max: 50000, step: 10 })
