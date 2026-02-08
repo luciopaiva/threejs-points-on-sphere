@@ -3,7 +3,6 @@ import * as EssentialsPlugin from "@tweakpane/plugin-essentials";
 import * as THREE from "three";
 import ParticlesGeometry from "./particles-geometry.js";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
-import ParticlesMaterial from "./particles-material.js";
 
 export default class Demo {
 
@@ -25,7 +24,7 @@ export default class Demo {
             particleSize: 0.001,
             numParticles: 10000,
             color: '#d97e3f',
-            singlePatchMode: false,
+            singlePatchMode: true,
             numMeridians: 20,
             numParallels: 10,
             lng: 5,
@@ -59,7 +58,7 @@ export default class Demo {
         });
 
         this.#camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
-        this.#camera.position.z = 2;
+        this.#camera.position.z = 3;
         this.#scene.add(this.#camera);
 
         this.#controls = new OrbitControls(this.#camera, canvas);
@@ -70,9 +69,6 @@ export default class Demo {
         });
         this.#renderer.setSize(sizes.width, sizes.height);
         this.#renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const axes = new THREE.AxesHelper(0.5);
-        this.#scene.add(axes);
 
         this.update();
     }
@@ -85,7 +81,11 @@ export default class Demo {
         this.#particlesGeometry.setSinglePatchMode(this.#settings.singlePatchMode);
         this.#particlesGeometry.recreate();
 
-        this.#particlesMaterial = new ParticlesMaterial(this.#settings.particleSize, this.#settings.color);
+        this.#particlesMaterial = new THREE.PointsMaterial({
+            size: this.#settings.particleSize,
+            sizeAttenuation: true,
+            color: this.#settings.color,
+        });
 
         const particles = new THREE.Points(this.#particlesGeometry, this.#particlesMaterial);
         this.#scene.add(particles);
@@ -100,7 +100,7 @@ export default class Demo {
 
         this.#fpsGraph = pane.addBlade({ view: "fpsgraph", label: "FPS", rows: 2 });
 
-        pane.addBinding(this.#settings, 'particleSize', { min: 0, max: 0.01, step: 0.001 })
+        pane.addBinding(this.#settings, 'particleSize', { min: 0, max: 0.1, step: 0.01 })
             .on("change", (event) => { this.#particlesMaterial.size = event.value; });
 
         pane.addBinding(this.#settings, 'numParticles', { min: 0, max: 50000, step: 10 })

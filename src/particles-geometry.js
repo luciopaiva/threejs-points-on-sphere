@@ -45,9 +45,6 @@ export default class ParticlesGeometry extends THREE.BufferGeometry {
         const positions = new Float32Array(this.#count * 3);
         this.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-        const normals = new Float32Array(this.#count * 3);
-        this.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
-
         // reset every time so we get deterministic results
         this.#rand.reset();
 
@@ -56,7 +53,6 @@ export default class ParticlesGeometry extends THREE.BufferGeometry {
         }
 
         this.attributes.position.needsUpdate = true;
-        this.attributes.normal.needsUpdate = true;
     }
 
     #generatePoint(index) {
@@ -76,7 +72,8 @@ export default class ParticlesGeometry extends THREE.BufferGeometry {
         const y = Math.cos(phi);
         const z = Math.sin(phi) * Math.sin(theta);
 
-        this.attributes.position.setXYZ(index, x, y, z);
-        this.attributes.normal.setXYZ(index, x, y, z);
+        this.attributes.position.array[arrayIndex] = x;
+        this.attributes.position.array[arrayIndex + 1] = y;
+        this.attributes.position.array[arrayIndex + 2] = z;
     }
 }
